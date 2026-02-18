@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=64", "wheel", "pybind11>=2.11", "cmake>=3.15"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "volestipy"
+version = "0.1.0"
+description = "Python bindings for the volesti library (convex body sampling & volume)"
+readme = "README.md"
+license = { text = "LGPL-3.0-or-later" }
+requires-python = ">=3.8"
+dependencies = ["numpy>=1.20"]
+keywords = [
+    "convex-bodies",
+    "sampling",
+    "volume-approximation",
+    "polytope",
+    "monte-carlo",
+    "random-walk",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: C++",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "matplotlib", "scipy"]
+
+[project.urls]
+Homepage = "https://github.com/GeomScale/volesti"
+Repository = "https://github.com/GeomScale/volestipy"

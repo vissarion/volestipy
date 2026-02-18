@@ -1,0 +1,4 @@
+[submodule "external/volesti"]
+	path = external/volesti
+	url = https://github.com/GeomScale/volesti.git
+	branch = develop
