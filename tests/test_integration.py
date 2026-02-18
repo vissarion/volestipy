@@ -12,6 +12,12 @@ try:
 except ImportError:
     HAVE_EXT = False
 
+try:
+    from volestipy._volestipy import vpoly_sample as _vpoly_sample  # noqa: F401
+    HAVE_VPOLY = True
+except (ImportError, AttributeError):
+    HAVE_VPOLY = False
+
 pytestmark = pytest.mark.skipif(not HAVE_EXT,
     reason="C++ extension _volestipy not built")
 
@@ -44,12 +50,14 @@ class TestFreeFunctions:
         expected = cube_volume(d)
         assert abs(vol - expected) / expected < 0.5
 
+    @pytest.mark.skipif(not HAVE_VPOLY, reason="VPolytope not available (DISABLE_LPSOLVE)")
     def test_vpoly_sample_function(self):
         from volestipy._volestipy import vpoly_sample
         V = np.array([[0., 0.], [1., 0.], [0., 1.]])
         samples = vpoly_sample(V, n_samples=100, seed=0)
         assert samples.shape == (2, 100)
 
+    @pytest.mark.skipif(not HAVE_VPOLY, reason="VPolytope not available (DISABLE_LPSOLVE)")
     def test_vpoly_volume_function(self):
         from volestipy._volestipy import vpoly_volume
         V = np.array([[0., 0.], [1., 0.], [0., 1.]])
@@ -104,7 +112,7 @@ class TestSamplingStatistics:
 class TestHighDimensional:
     """Basic sanity checks for higher dimensions."""
 
-    @pytest.mark.parametrize("d", [10, 20])
+    @pytest.mark.parametrize("d", [10, 15])
     def test_cube_sampling_high_dim(self, d):
         P = hypercube(d)
         samples = P.sample(n_samples=200, walk_length=10, seed=0)

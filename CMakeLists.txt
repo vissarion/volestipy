@@ -46,12 +46,15 @@ if(NOT Eigen3_FOUND)
 endif()
 
 # ─── Find Boost ──────────────────────────────────────────────────────────────
-find_package(Boost 1.56 REQUIRED COMPONENTS
-    random
-    system
-    filesystem
-    math_c99
-)
+# volesti only needs Boost headers (random, math) – no compiled libraries required
+find_package(Boost 1.56 REQUIRED)
+if(NOT Boost_FOUND)
+    # Fallback: locate headers manually
+    find_path(Boost_INCLUDE_DIRS NAMES boost/random.hpp
+        PATHS /usr/include /usr/local/include
+        REQUIRED)
+    message(STATUS "Boost headers found at ${Boost_INCLUDE_DIRS}")
+endif()
 
 # ─── volesti include path ─────────────────────────────────────────────────────
 # You can override this with -DVOLESTI_INCLUDE_DIR=/path/to/volesti/include
@@ -102,13 +105,14 @@ pybind11_add_module(_volestipy MODULE
 )
 
 target_include_directories(_volestipy PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include   # project local headers (sampling_minimal.hpp)
     ${VOLESTI_INCLUDE_DIR}
+    ${VOLESTI_INCLUDE_DIR}/../external   # Spectra, minimum_ellipsoid, etc.
     ${Boost_INCLUDE_DIRS}
 )
 
 target_link_libraries(_volestipy PRIVATE
     Eigen3::Eigen
-    ${Boost_LIBRARIES}
     ${LPSOLVE_LIBRARIES}
 )
 
@@ -131,7 +135,7 @@ message(STATUS "=== volestipy configuration ===")
 message(STATUS "  Build type       : ${CMAKE_BUILD_TYPE}")
 message(STATUS "  volesti headers  : ${VOLESTI_INCLUDE_DIR}")
 message(STATUS "  Eigen3           : ${EIGEN3_VERSION}")
-message(STATUS "  Boost            : ${Boost_VERSION}")
+message(STATUS "  Boost            : ${Boost_VERSION} (headers-only)")
 message(STATUS "  pybind11         : ${pybind11_VERSION}")
 message(STATUS "  LP-solve         : ${DISABLE_LPSOLVE}")
 message(STATUS "================================")

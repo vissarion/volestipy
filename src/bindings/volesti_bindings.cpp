@@ -13,27 +13,39 @@
 // Volesti core headers
 #include "cartesian_geom/cartesian_kernel.h"
 #include "convex_bodies/hpolytope.h"
-#include "convex_bodies/vpolytope.h"
+#ifndef DISABLE_LPSOLVE
+  #include "convex_bodies/vpolytope.h"
+#endif
 #include "convex_bodies/ball.h"
 #include "convex_bodies/ballintersectconvex.h"
 
-// Random walks
-#include "random_walks/random_walks.hpp"
+// Random walks (include only what we use, avoiding ifopt/nlp dependency)
+#include "random_walks/uniform_cdhr_walk.hpp"
+#include "random_walks/uniform_rdhr_walk.hpp"
+#include "random_walks/uniform_ball_walk.hpp"
+#include "random_walks/uniform_billiard_walk.hpp"
+#include "random_walks/uniform_accelerated_billiard_walk.hpp"
+#include "random_walks/uniform_dikin_walk.hpp"
+#include "random_walks/uniform_john_walk.hpp"
+#include "random_walks/uniform_vaidya_walk.hpp"
+#include "random_walks/gaussian_cdhr_walk.hpp"
+#include "random_walks/gaussian_rdhr_walk.hpp"
+#include "random_walks/gaussian_ball_walk.hpp"
+#include "random_walks/gaussian_helpers.hpp"
 
 // Volume computation
 #include "volume/volume_sequence_of_balls.hpp"
 #include "volume/volume_cooling_balls.hpp"
 #include "volume/volume_cooling_gaussians.hpp"
 
-// Sampling
-#include "sampling/sampling.hpp"
+// Sampling (minimal version that avoids ifopt/ode_solvers dependency)
+#include "sampling_minimal.hpp"
 
 // Generators
 #include "generators/boost_random_number_generator.hpp"
 
 // Preprocessing
 #include "preprocess/min_sampling_covering_ellipsoid_rounding.hpp"
-#include "preprocess/max_inscribed_ellipsoid_rounding.hpp"
 #include "preprocess/inscribed_ellipsoid_rounding.hpp"
 
 #include <Eigen/Eigen>
@@ -48,7 +60,9 @@ typedef double NT;
 typedef Cartesian<NT> Kernel;
 typedef typename Kernel::Point Point;
 typedef HPolytope<Point> HPolytopeType;
+#ifndef DISABLE_LPSOLVE
 typedef VPolytope<Point> VPolytopeType;
+#endif
 typedef Ball<Point> BallType;
 typedef BoostRandomNumberGenerator<boost::mt11213b, NT> RNGType;
 typedef Eigen::Matrix<NT, Eigen::Dynamic, Eigen::Dynamic> MatrixXd;
@@ -147,6 +161,7 @@ MatrixXd hpoly_uniform_sample(HPolytopeType& P,
     return points_to_matrix(randPoints);
 }
 
+#ifndef DISABLE_LPSOLVE
 MatrixXd vpoly_uniform_sample(VPolytopeType& P,
                                int n_samples,
                                int walk_length,
@@ -187,6 +202,7 @@ MatrixXd vpoly_uniform_sample(VPolytopeType& P,
 
     return points_to_matrix(randPoints);
 }
+#endif  // DISABLE_LPSOLVE
 
 // ============================================================
 // Gaussian sampling for HPolytope
@@ -271,15 +287,16 @@ double hpoly_volume_sequence_of_balls(HPolytopeType& P,
                                        double error,
                                        int walk_length,
                                        const std::string& walk_type) {
+    RNGType rng(P.dimension());
     double vol;
     if (walk_type == "cdhr" || walk_type == "CDHR") {
-        vol = volume_sequence_of_balls<CDHRWalk>(P, error, walk_length);
+        vol = volume_sequence_of_balls<CDHRWalk>(P, rng, error, walk_length);
     } else if (walk_type == "rdhr" || walk_type == "RDHR") {
-        vol = volume_sequence_of_balls<RDHRWalk>(P, error, walk_length);
+        vol = volume_sequence_of_balls<RDHRWalk>(P, rng, error, walk_length);
     } else if (walk_type == "ball_walk" || walk_type == "BallWalk") {
-        vol = volume_sequence_of_balls<BallWalk>(P, error, walk_length);
+        vol = volume_sequence_of_balls<BallWalk>(P, rng, error, walk_length);
     } else if (walk_type == "billiard" || walk_type == "BilliardWalk") {
-        vol = volume_sequence_of_balls<BilliardWalk>(P, error, walk_length);
+        vol = volume_sequence_of_balls<BilliardWalk>(P, rng, error, walk_length);
     } else {
         throw std::invalid_argument("Unknown walk type: '" + walk_type + "'.");
     }
@@ -290,15 +307,16 @@ double hpoly_volume_cooling_balls(HPolytopeType& P,
                                    double error,
                                    int walk_length,
                                    const std::string& walk_type) {
+    RNGType rng(P.dimension());
     std::pair<double, double> res;
     if (walk_type == "cdhr" || walk_type == "CDHR") {
-        res = volume_cooling_balls<CDHRWalk>(P, error, walk_length);
+        res = volume_cooling_balls<CDHRWalk>(P, rng, error, walk_length);
     } else if (walk_type == "rdhr" || walk_type == "RDHR") {
-        res = volume_cooling_balls<RDHRWalk>(P, error, walk_length);
+        res = volume_cooling_balls<RDHRWalk>(P, rng, error, walk_length);
     } else if (walk_type == "ball_walk" || walk_type == "BallWalk") {
-        res = volume_cooling_balls<BallWalk>(P, error, walk_length);
+        res = volume_cooling_balls<BallWalk>(P, rng, error, walk_length);
     } else if (walk_type == "billiard" || walk_type == "BilliardWalk") {
-        res = volume_cooling_balls<BilliardWalk>(P, error, walk_length);
+        res = volume_cooling_balls<BilliardWalk>(P, rng, error, walk_length);
     } else {
         throw std::invalid_argument("Unknown walk type: '" + walk_type + "'.");
     }
@@ -309,31 +327,34 @@ double hpoly_volume_cooling_gaussians(HPolytopeType& P,
                                        double error,
                                        int walk_length,
                                        const std::string& walk_type) {
-    std::pair<double, double> res;
+    RNGType rng(P.dimension());
+    double vol;
     if (walk_type == "cdhr" || walk_type == "CDHR") {
-        res = volume_cooling_gaussians<GaussianCDHRWalk>(P, error, walk_length);
+        vol = volume_cooling_gaussians<GaussianCDHRWalk>(P, rng, error, walk_length);
     } else if (walk_type == "rdhr" || walk_type == "RDHR") {
-        res = volume_cooling_gaussians<GaussianRDHRWalk>(P, error, walk_length);
+        vol = volume_cooling_gaussians<GaussianRDHRWalk>(P, rng, error, walk_length);
     } else if (walk_type == "ball_walk" || walk_type == "BallWalk") {
-        res = volume_cooling_gaussians<GaussianBallWalk>(P, error, walk_length);
+        vol = volume_cooling_gaussians<GaussianBallWalk>(P, rng, error, walk_length);
     } else {
         throw std::invalid_argument("Unknown Gaussian walk type: '" + walk_type + "'.");
     }
-    return res.second;
+    return vol;
 }
 
 // VPolytope volume
+#ifndef DISABLE_LPSOLVE
 double vpoly_volume_sequence_of_balls(VPolytopeType& P,
                                        double error,
                                        int walk_length,
                                        const std::string& walk_type) {
+    RNGType rng(P.dimension());
     double vol;
     if (walk_type == "cdhr" || walk_type == "CDHR") {
-        vol = volume_sequence_of_balls<CDHRWalk>(P, error, walk_length);
+        vol = volume_sequence_of_balls<CDHRWalk>(P, rng, error, walk_length);
     } else if (walk_type == "rdhr" || walk_type == "RDHR") {
-        vol = volume_sequence_of_balls<RDHRWalk>(P, error, walk_length);
+        vol = volume_sequence_of_balls<RDHRWalk>(P, rng, error, walk_length);
     } else if (walk_type == "ball_walk" || walk_type == "BallWalk") {
-        vol = volume_sequence_of_balls<BallWalk>(P, error, walk_length);
+        vol = volume_sequence_of_balls<BallWalk>(P, rng, error, walk_length);
     } else {
         throw std::invalid_argument("Unknown walk type: '" + walk_type + "'.");
     }
@@ -344,44 +365,45 @@ double vpoly_volume_cooling_balls(VPolytopeType& P,
                                    double error,
                                    int walk_length,
                                    const std::string& walk_type) {
+    RNGType rng(P.dimension());
     std::pair<double, double> res;
     if (walk_type == "cdhr" || walk_type == "CDHR") {
-        res = volume_cooling_balls<CDHRWalk>(P, error, walk_length);
+        res = volume_cooling_balls<CDHRWalk>(P, rng, error, walk_length);
     } else if (walk_type == "rdhr" || walk_type == "RDHR") {
-        res = volume_cooling_balls<RDHRWalk>(P, error, walk_length);
+        res = volume_cooling_balls<RDHRWalk>(P, rng, error, walk_length);
     } else if (walk_type == "ball_walk" || walk_type == "BallWalk") {
-        res = volume_cooling_balls<BallWalk>(P, error, walk_length);
+        res = volume_cooling_balls<BallWalk>(P, rng, error, walk_length);
     } else {
         throw std::invalid_argument("Unknown walk type: '" + walk_type + "'.");
     }
     return res.second;
 }
+#endif  // DISABLE_LPSOLVE
 
 // ============================================================
 // Rounding helpers
 // ============================================================
-py::tuple hpoly_round_min_ellipsoid(HPolytopeType& P) {
-    MatrixXd T;
-    VectorXd T_shift;
-    NT round_val;
+py::tuple hpoly_round_min_ellipsoid(HPolytopeType& P,
+                                     int walk_length,
+                                     unsigned int seed) {
     auto inner_ball = P.ComputeInnerBall();
     if (inner_ball.second < 0.0)
         throw std::runtime_error("Failed to compute inner ball.");
-
-    min_sampling_covering_ellipsoid_rounding(P, inner_ball, T, T_shift, round_val);
-    return py::make_tuple(T, T_shift, round_val);
+    RNGType rng(P.dimension());
+    rng.set_seed(seed);
+    auto [T, shift, round_val] =
+        min_sampling_covering_ellipsoid_rounding<CDHRWalk, MatrixXd, VectorXd>(
+            P, inner_ball, walk_length, rng);
+    return py::make_tuple(T, shift, round_val);
 }
 
-py::tuple hpoly_round_max_ellipsoid(HPolytopeType& P) {
-    MatrixXd T;
-    VectorXd T_shift;
-    NT round_val;
+py::tuple hpoly_round_max_inscribed_ellipsoid(HPolytopeType& P) {
     auto inner_ball = P.ComputeInnerBall();
     if (inner_ball.second < 0.0)
         throw std::runtime_error("Failed to compute inner ball.");
-
-    max_inscribed_ellipsoid_rounding(P, inner_ball, T, T_shift, round_val);
-    return py::make_tuple(T, T_shift, round_val);
+    auto [T, shift, round_val] =
+        inscribed_ellipsoid_rounding<MatrixXd, VectorXd, NT>(P, inner_ball.first);
+    return py::make_tuple(T, shift, round_val);
 }
 
 
@@ -609,14 +631,17 @@ PYBIND11_MODULE(_volestipy, m) {
         )pbdoc")
 
         // Rounding
-        .def("round_min_ellipsoid", [](HPolytopeType& P) {
-            return hpoly_round_min_ellipsoid(P);
-        }, R"pbdoc(
-        Round the polytope by mapping the minimum enclosing ellipsoid to the
-        unit ball. Returns (T, T_shift, round_value).
+        .def("round_min_ellipsoid", [](HPolytopeType& P,
+                                       int walk_length,
+                                       unsigned int seed) {
+            return hpoly_round_min_ellipsoid(P, walk_length, seed);
+        }, py::arg("walk_length") = 1, py::arg("seed") = 0,
+        R"pbdoc(
+        Round the polytope via the minimum enclosing ellipsoid of random samples.
+        Returns (T, T_shift, round_value).
         )pbdoc")
         .def("round_max_ellipsoid", [](HPolytopeType& P) {
-            return hpoly_round_max_ellipsoid(P);
+            return hpoly_round_max_inscribed_ellipsoid(P);
         }, R"pbdoc(
         Round the polytope by mapping the maximum inscribed ellipsoid to the
         unit ball. Returns (T, T_shift, round_value).
@@ -625,6 +650,7 @@ PYBIND11_MODULE(_volestipy, m) {
     // ----------------------------------------------------------
     // VPolytope
     // ----------------------------------------------------------
+#ifndef DISABLE_LPSOLVE
     py::class_<VPolytopeType>(m, "VPolytope",
         R"pbdoc(
         V-polytope: a convex polytope defined as the convex hull of vertices.
@@ -728,6 +754,7 @@ PYBIND11_MODULE(_volestipy, m) {
         -------
         float
         )pbdoc");
+#endif  // DISABLE_LPSOLVE
 
     // ----------------------------------------------------------
     // Module-level free functions
@@ -767,6 +794,7 @@ PYBIND11_MODULE(_volestipy, m) {
        py::arg("seed") = 0,
     "Uniformly sample from the H-polytope {x: Ax <= b}.");
 
+#ifndef DISABLE_LPSOLVE
     m.def("vpoly_sample", [](const MatrixXd& V,
                               int n_samples, int walk_length, int n_burns,
                               const std::string& walk_type, unsigned int seed) {
@@ -801,6 +829,7 @@ PYBIND11_MODULE(_volestipy, m) {
        py::arg("algorithm") = "cooling_balls",
        py::arg("walk_type") = "cdhr",
     "Compute the volume of the V-polytope (convex hull of rows of V).");
+#endif  // DISABLE_LPSOLVE
 
     // Version info
     m.attr("__version__") = "0.1.0";
