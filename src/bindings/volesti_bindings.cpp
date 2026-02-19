@@ -13,9 +13,7 @@
 // Volesti core headers
 #include "cartesian_geom/cartesian_kernel.h"
 #include "convex_bodies/hpolytope.h"
-#ifndef DISABLE_LPSOLVE
-  #include "convex_bodies/vpolytope.h"
-#endif
+#include "convex_bodies/vpolytope.h"
 #include "convex_bodies/ball.h"
 #include "convex_bodies/ballintersectconvex.h"
 
@@ -60,9 +58,7 @@ typedef double NT;
 typedef Cartesian<NT> Kernel;
 typedef typename Kernel::Point Point;
 typedef HPolytope<Point> HPolytopeType;
-#ifndef DISABLE_LPSOLVE
 typedef VPolytope<Point> VPolytopeType;
-#endif
 typedef Ball<Point> BallType;
 typedef BoostRandomNumberGenerator<boost::mt11213b, NT> RNGType;
 typedef Eigen::Matrix<NT, Eigen::Dynamic, Eigen::Dynamic> MatrixXd;
@@ -161,7 +157,6 @@ MatrixXd hpoly_uniform_sample(HPolytopeType& P,
     return points_to_matrix(randPoints);
 }
 
-#ifndef DISABLE_LPSOLVE
 MatrixXd vpoly_uniform_sample(VPolytopeType& P,
                                int n_samples,
                                int walk_length,
@@ -202,7 +197,6 @@ MatrixXd vpoly_uniform_sample(VPolytopeType& P,
 
     return points_to_matrix(randPoints);
 }
-#endif  // DISABLE_LPSOLVE
 
 // ============================================================
 // Gaussian sampling for HPolytope
@@ -342,7 +336,6 @@ double hpoly_volume_cooling_gaussians(HPolytopeType& P,
 }
 
 // VPolytope volume
-#ifndef DISABLE_LPSOLVE
 double vpoly_volume_sequence_of_balls(VPolytopeType& P,
                                        double error,
                                        int walk_length,
@@ -378,7 +371,6 @@ double vpoly_volume_cooling_balls(VPolytopeType& P,
     }
     return res.second;
 }
-#endif  // DISABLE_LPSOLVE
 
 // ============================================================
 // Rounding helpers
@@ -650,7 +642,6 @@ PYBIND11_MODULE(_volestipy, m) {
     // ----------------------------------------------------------
     // VPolytope
     // ----------------------------------------------------------
-#ifndef DISABLE_LPSOLVE
     py::class_<VPolytopeType>(m, "VPolytope",
         R"pbdoc(
         V-polytope: a convex polytope defined as the convex hull of vertices.
@@ -754,7 +745,6 @@ PYBIND11_MODULE(_volestipy, m) {
         -------
         float
         )pbdoc");
-#endif  // DISABLE_LPSOLVE
 
     // ----------------------------------------------------------
     // Module-level free functions
@@ -794,7 +784,6 @@ PYBIND11_MODULE(_volestipy, m) {
        py::arg("seed") = 0,
     "Uniformly sample from the H-polytope {x: Ax <= b}.");
 
-#ifndef DISABLE_LPSOLVE
     m.def("vpoly_sample", [](const MatrixXd& V,
                               int n_samples, int walk_length, int n_burns,
                               const std::string& walk_type, unsigned int seed) {
@@ -829,7 +818,6 @@ PYBIND11_MODULE(_volestipy, m) {
        py::arg("algorithm") = "cooling_balls",
        py::arg("walk_type") = "cdhr",
     "Compute the volume of the V-polytope (convex hull of rows of V).");
-#endif  // DISABLE_LPSOLVE
 
     // Version info
     m.attr("__version__") = "0.1.0";

@@ -45,7 +45,7 @@ cd "${BUILD_DIR}"
 cmake "${SCRIPT_DIR}" \
     -DCMAKE_BUILD_TYPE=Release \
     -DVOLESTI_INCLUDE_DIR="${VOLESTI_INCLUDE_DIR}" \
-    -DDISABLE_LPSOLVE=ON \
+    -DDISABLE_LPSOLVE=OFF \
     -DPYTHON_EXECUTABLE="$(command -v python3)"
 
 # ── Build ─────────────────────────────────────────────────────────────────────

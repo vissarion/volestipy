@@ -43,7 +43,7 @@ class CMakeBuild(build_ext):
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DVOLESTI_INCLUDE_DIR={volesti_include}",
             f"-DCMAKE_BUILD_TYPE=Release",
-            "-DDISABLE_LPSOLVE=ON",
+            "-DDISABLE_LPSOLVE=OFF",
         ]
 
         build_args = ["--config", "Release", "--", "-j4"]

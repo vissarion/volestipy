@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(volestipy VERSION 0.1.0 LANGUAGES CXX)
+project(volestipy VERSION 0.1.0 LANGUAGES C CXX)
 
 # ─── C++ standard ────────────────────────────────────────────────────────────
 set(CMAKE_CXX_STANDARD 17)
@@ -12,7 +12,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # ─── Options ─────────────────────────────────────────────────────────────────
-option(DISABLE_LPSOLVE "Disable the LP-solve dependency" ON)
+option(DISABLE_LPSOLVE "Disable the LP-solve dependency" OFF)
 option(VOLESTIPY_USE_MKL "Use Intel MKL for Eigen" OFF)
 
 # ─── Find pybind11 ───────────────────────────────────────────────────────────
@@ -69,21 +69,64 @@ if(NOT EXISTS "${VOLESTI_INCLUDE_DIR}/cartesian_geom/cartesian_kernel.h")
         "  2. Set:  -DVOLESTI_INCLUDE_DIR=/path/to/volesti/include\n")
 endif()
 
-# ─── LP-solve (optional) ─────────────────────────────────────────────────────
+# ─── LP-solve (bundled source, same approach as dingo) ───────────────────────
+set(LPSOLVE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/lp_solve_5.5")
+
 if(DISABLE_LPSOLVE)
     set(LPSOLVE_DEFINITIONS -DDISABLE_LPSOLVE)
+    set(LPSOLVE_SOURCES "")
+    set(LPSOLVE_INCLUDE_DIRS "")
     message(STATUS "LP-solve disabled.")
+elseif(EXISTS "${LPSOLVE_DIR}/lp_lib.h")
+    message(STATUS "LP-solve bundled sources found at ${LPSOLVE_DIR}")
+    set(LPSOLVE_DEFINITIONS
+        -DYY_NEVER_INTERACTIVE
+        -DLoadInverseLib=0
+        -DLoadLanguageLib=0
+        -DRoleIsExternalInvEngine
+        -DINVERSE_ACTIVE=3
+        -DLoadableBlasLib=0
+    )
+    set(LPSOLVE_SOURCES
+        ${LPSOLVE_DIR}/bfp/bfp_LUSOL/lp_LUSOL.c
+        ${LPSOLVE_DIR}/bfp/bfp_LUSOL/LUSOL/lusol.c
+        ${LPSOLVE_DIR}/colamd/colamd.c
+        ${LPSOLVE_DIR}/ini.c
+        ${LPSOLVE_DIR}/shared/commonlib.c
+        ${LPSOLVE_DIR}/shared/mmio.c
+        ${LPSOLVE_DIR}/shared/myblas.c
+        ${LPSOLVE_DIR}/lp_crash.c
+        ${LPSOLVE_DIR}/lp_Hash.c
+        ${LPSOLVE_DIR}/lp_lib.c
+        ${LPSOLVE_DIR}/lp_matrix.c
+        ${LPSOLVE_DIR}/lp_MDO.c
+        ${LPSOLVE_DIR}/lp_mipbb.c
+        ${LPSOLVE_DIR}/lp_MPS.c
+        ${LPSOLVE_DIR}/lp_params.c
+        ${LPSOLVE_DIR}/lp_presolve.c
+        ${LPSOLVE_DIR}/lp_price.c
+        ${LPSOLVE_DIR}/lp_pricePSE.c
+        ${LPSOLVE_DIR}/lp_report.c
+        ${LPSOLVE_DIR}/lp_scale.c
+        ${LPSOLVE_DIR}/lp_simplex.c
+        ${LPSOLVE_DIR}/lp_SOS.c
+        ${LPSOLVE_DIR}/lp_utils.c
+        ${LPSOLVE_DIR}/lp_wlp.c
+    )
+    set(LPSOLVE_INCLUDE_DIRS
+        ${LPSOLVE_DIR}
+        ${LPSOLVE_DIR}/bfp
+        ${LPSOLVE_DIR}/bfp/bfp_LUSOL
+        ${LPSOLVE_DIR}/bfp/bfp_LUSOL/LUSOL
+        ${LPSOLVE_DIR}/colamd
+        ${LPSOLVE_DIR}/shared
+    )
 else()
-    find_library(LPSOLVE_LIB NAMES lpsolve55 lp_solve55)
-    find_path(LPSOLVE_INCLUDE_DIR NAMES lp_lib.h)
-    if(LPSOLVE_LIB AND LPSOLVE_INCLUDE_DIR)
-        message(STATUS "LP-solve found: ${LPSOLVE_LIB}")
-        set(LPSOLVE_DEFINITIONS "")
-        set(LPSOLVE_LIBRARIES ${LPSOLVE_LIB})
-    else()
-        message(WARNING "LP-solve not found; disabling.")
-        set(LPSOLVE_DEFINITIONS -DDISABLE_LPSOLVE)
-    endif()
+    message(WARNING "LP-solve bundled sources not found at ${LPSOLVE_DIR}; disabling.")
+    message(WARNING "Run: wget -P external/ https://sourceforge.net/projects/lpsolve/files/lpsolve/5.5.2.11/lp_solve_5.5.2.11_source.tar.gz && tar xzf external/lp_solve_5.5.2.11_source.tar.gz -C external/")
+    set(LPSOLVE_DEFINITIONS -DDISABLE_LPSOLVE)
+    set(LPSOLVE_SOURCES "")
+    set(LPSOLVE_INCLUDE_DIRS "")
 endif()
 
 # ─── Compiler flags ──────────────────────────────────────────────────────────
@@ -102,6 +145,7 @@ endif()
 # ─── Build the extension ─────────────────────────────────────────────────────
 pybind11_add_module(_volestipy MODULE
     src/bindings/volesti_bindings.cpp
+    ${LPSOLVE_SOURCES}
 )
 
 target_include_directories(_volestipy PRIVATE
@@ -109,11 +153,11 @@ target_include_directories(_volestipy PRIVATE
     ${VOLESTI_INCLUDE_DIR}
     ${VOLESTI_INCLUDE_DIR}/../external   # Spectra, minimum_ellipsoid, etc.
     ${Boost_INCLUDE_DIRS}
+    ${LPSOLVE_INCLUDE_DIRS}
 )
 
 target_link_libraries(_volestipy PRIVATE
     Eigen3::Eigen
-    ${LPSOLVE_LIBRARIES}
 )
 
 target_compile_definitions(_volestipy PRIVATE

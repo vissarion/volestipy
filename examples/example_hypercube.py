@@ -23,7 +23,7 @@ def main():
     # ------------------------------------------------------------------
     # 1. Build the 4-D hypercube [-1, 1]^4
     # ------------------------------------------------------------------
-    d = 4
+    d = 10
     P = hypercube(d)
     print(f"\nPolytope: {P}")
     center, radius = P.compute_inner_ball()
@@ -66,7 +66,7 @@ def main():
     print(f"All sum <= 1:      {(samples_s.sum(axis=0) <= 1 + 1e-9).all()}")
     vol_s = S.volume(error=0.2)
     print(f"Volume estimate: {vol_s:.5f}  (true ≈ {1.0/6:.5f})")
-
+    
     # ------------------------------------------------------------------
     # 6. V-Polytope: 2-D triangle
     # ------------------------------------------------------------------
@@ -80,7 +80,7 @@ def main():
     print(f"Points inside: {in_count}/{t_samples.shape[1]}")
     vol_t = T.volume(error=0.3)
     print(f"Volume estimate: {vol_t:.4f}  (true = 0.5)")
-
+    
     print("\nDone.")
 
 

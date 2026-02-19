@@ -43,3 +43,4 @@ Thumbs.db
 .coverage
 htmlcov/
 .tox/
+external/lp_solve_5.5/

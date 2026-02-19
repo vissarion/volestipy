@@ -62,25 +62,10 @@ from volestipy._volestipy import (  # noqa: E402  # type: ignore[import]
     HPolytope as _HPolytope,
     hpoly_volume,
     hpoly_sample,
+    VPolytope as _VPolytope,
+    vpoly_volume,
+    vpoly_sample,
 )
-
-# VPolytope may be absent when built with DISABLE_LPSOLVE
-try:
-    from volestipy._volestipy import (  # type: ignore[import]
-        VPolytope as _VPolytope,
-        vpoly_volume,
-        vpoly_sample,
-    )
-    _VPOLY_AVAILABLE = True
-except ImportError:
-    _VPolytope = None  # type: ignore[assignment]
-    _VPOLY_AVAILABLE = False
-
-    def vpoly_volume(*args, **kwargs):  # type: ignore[misc]
-        raise RuntimeError("VPolytope support is not available (built with DISABLE_LPSOLVE).")
-
-    def vpoly_sample(*args, **kwargs):  # type: ignore[misc]
-        raise RuntimeError("VPolytope support is not available (built with DISABLE_LPSOLVE).")
 
 
 # ── High-level Python wrappers ────────────────────────────────────────────────
@@ -368,11 +353,6 @@ class VPolytope:
     """
 
     def __init__(self, V: np.ndarray):
-        if not _VPOLY_AVAILABLE:
-            raise RuntimeError(
-                "VPolytope support is not available because the extension was built "
-                "with DISABLE_LPSOLVE.  Install lp_solve and rebuild without that flag."
-            )
         V = np.asarray(V, dtype=float, order="C")
         if V.ndim != 2:
             raise ValueError("V must be a 2-D array with shape (n_vertices, d).")
