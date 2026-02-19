@@ -4,6 +4,7 @@ Python bindings for the [volesti](https://github.com/GeomScale/volesti) C++ libr
 a high-performance library for **volume approximation** and **sampling** of convex bodies
 (H-polytopes, V-polytopes).
 
+[![CI](https://github.com/vissarion/volestipy/actions/workflows/ci.yml/badge.svg)](https://github.com/vissarion/volestipy/actions/workflows/ci.yml)
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 
 ---
