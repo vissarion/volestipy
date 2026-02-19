@@ -128,14 +128,10 @@ MatrixXd hpoly_uniform_sample(HPolytopeType& P,
         uniform_sampling<BallWalk>(randPoints, P, rng,
                                    walk_length, n_samples,
                                    starting_point, n_burns);
-    } else if (walk_type == "billiard" || walk_type == "BilliardWalk") {
+    } else if (walk_type == "billiard" || walk_type == "AcceleratedBilliardWalk") {
         uniform_sampling<BilliardWalk>(randPoints, P, rng,
                                        walk_length, n_samples,
                                        starting_point, n_burns);
-    } else if (walk_type == "accelerated_billiard" || walk_type == "AcceleratedBilliardWalk") {
-        uniform_sampling<AcceleratedBilliardWalk>(randPoints, P, rng,
-                                                  walk_length, n_samples,
-                                                  starting_point, n_burns);
     } else if (walk_type == "dikin" || walk_type == "DikinWalk") {
         uniform_sampling<DikinWalk>(randPoints, P, rng,
                                     walk_length, n_samples,
@@ -151,7 +147,7 @@ MatrixXd hpoly_uniform_sample(HPolytopeType& P,
     } else {
         throw std::invalid_argument("Unknown walk type: '" + walk_type +
             "'. Choose from: cdhr, rdhr, ball_walk, billiard, "
-            "accelerated_billiard, dikin, john, vaidya.");
+            "dikin, john, vaidya.");
     }
 
     return points_to_matrix(randPoints);
@@ -492,7 +488,7 @@ PYBIND11_MODULE(_volestipy, m) {
             Number of burn-in steps.
         walk_type : str
             Walk algorithm. One of: 'cdhr', 'rdhr', 'ball_walk',
-            'billiard', 'accelerated_billiard', 'dikin', 'john', 'vaidya'.
+            'billiard', 'dikin', 'john', 'vaidya'.
         seed : int
             Random seed.
 

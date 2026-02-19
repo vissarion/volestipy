@@ -1,5 +1,5 @@
 """
-Tests for volestipy.VPolytope – construction, membership, sampling, volume.
+Tests for volestipy.VPolytope - construction, membership, sampling, volume.
 """
 import math
 import numpy as np
@@ -105,7 +105,7 @@ class TestVPolytopeInnerBall:
 # ── Sampling tests ────────────────────────────────────────────────────────────
 
 class TestVPolytopeUniformSampling:
-    @pytest.mark.parametrize("walk_type", ["cdhr", "rdhr", "ball_walk"])
+    @pytest.mark.parametrize("walk_type", ["cdhr", "rdhr", "ball_walk", "billiard"])
     def test_sample_shape(self, walk_type):
         P = make_simplex_vpoly(3)
         samples = P.sample(n_samples=100, walk_type=walk_type, seed=42)
@@ -135,21 +135,25 @@ class TestVPolytopeUniformSampling:
 # ── Volume tests ──────────────────────────────────────────────────────────────
 
 class TestVPolytopeVolume:
-    def test_simplex_volume_2d(self):
+    #cooling_gaussians not applicable to V-polytopes
+    @pytest.mark.parametrize("volume_algo", ["cooling_balls", "sequence_of_balls"]) 
+    def test_simplex_volume_2d(self, volume_algo):
         # Vol(triangle with vertices (0,0),(1,0),(0,1)) = 0.5
         V = np.array([[0., 0.], [1., 0.], [0., 1.]])
         P = VPolytope(V)
-        vol = P.volume(error=0.3, algorithm="cooling_balls")
+        vol = P.volume(error=0.3, algorithm=volume_algo)
         expected = 0.5
         assert abs(vol - expected) / expected < 1.0, f"vol={vol:.4f}"
 
-    def test_square_volume(self):
+    @pytest.mark.parametrize("volume_algo", ["cooling_balls", "sequence_of_balls"])
+    def test_square_volume(self, volume_algo):
         P = make_cube_vpoly_2d()
-        vol = P.volume(error=0.3, algorithm="cooling_balls")
+        vol = P.volume(error=0.3, algorithm=volume_algo)
         expected = 4.0  # 2x2 square
         assert abs(vol - expected) / expected < 0.5, f"vol={vol:.3f}"
 
-    def test_volume_positive(self):
+    @pytest.mark.parametrize("volume_algo", ["cooling_balls", "sequence_of_balls"])
+    def test_volume_positive(self, volume_algo):
         P = make_simplex_vpoly(3)
-        vol = P.volume(error=0.3)
+        vol = P.volume(error=0.3, algorithm=volume_algo)
         assert vol > 0

@@ -1,4 +1,4 @@
-# conftest.py – shared pytest fixtures for volestipy tests
+# conftest.py - shared pytest fixtures for volestipy tests
 import pytest
 import numpy as np
 

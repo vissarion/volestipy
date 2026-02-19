@@ -1,5 +1,5 @@
 """
-setup.py for volestipy – Python bindings for the volesti library.
+setup.py for volestipy - Python bindings for the volesti library.
 
 Build:
     pip install . --no-build-isolation
@@ -98,7 +98,7 @@ setup(
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Programming Language :: Python :: 3",
         "Programming Language :: C++",
-        "Topic :: Scientific/Engineering :: Mathematics",
+        "Topic :: Scientific/Engineering :: Mathematics :: Optimization",
     ],
     zip_safe=False,
 )

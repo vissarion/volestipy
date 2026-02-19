@@ -1,5 +1,5 @@
 """
-Tests for volestipy.HPolytope – construction, membership, sampling, volume.
+Tests for volestipy.HPolytope - construction, membership, sampling, volume.
 """
 import math
 import numpy as np
@@ -168,9 +168,9 @@ class TestHPolytopeUniformSampling:
         with pytest.raises((RuntimeError, ValueError, Exception)):
             P.sample(walk_type="unknown_walk_xyz")
 
-    def test_accelerated_billiard(self):
+    def test_billiard(self):
         P = make_cube_hpoly(4)
-        samples = P.sample(n_samples=50, walk_type="accelerated_billiard", seed=0)
+        samples = P.sample(n_samples=50, walk_type="billiard", seed=0)
         assert samples.shape == (4, 50)
 
     @pytest.mark.parametrize("walk_type", ["dikin", "john", "vaidya"])

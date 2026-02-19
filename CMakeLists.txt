@@ -46,7 +46,7 @@ if(NOT Eigen3_FOUND)
 endif()
 
 # ─── Find Boost ──────────────────────────────────────────────────────────────
-# volesti only needs Boost headers (random, math) – no compiled libraries required
+# volesti only needs Boost headers (random, math) - no compiled libraries required
 find_package(Boost 1.56 REQUIRED)
 if(NOT Boost_FOUND)
     # Fallback: locate headers manually

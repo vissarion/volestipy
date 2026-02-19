@@ -32,7 +32,7 @@ def random_hpoly(d: int, m: int, seed: int = 0) -> HPolytope:
 
 def main():
     print("=" * 60)
-    print("volestipy – random polytope example")
+    print("volestipy - random polytope example")
     print("=" * 60)
 
     d = 5    # dimension

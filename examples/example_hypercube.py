@@ -17,13 +17,13 @@ except ImportError:
 
 def main():
     print("=" * 60)
-    print("volestipy – hypercube example")
+    print("volestipy - hypercube example")
     print("=" * 60)
 
     # ------------------------------------------------------------------
     # 1. Build the 4-D hypercube [-1, 1]^4
     # ------------------------------------------------------------------
-    d = 10
+    d = 40
     P = hypercube(d)
     print(f"\nPolytope: {P}")
     center, radius = P.compute_inner_ball()

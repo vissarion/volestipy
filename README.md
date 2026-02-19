@@ -35,7 +35,7 @@ a high-performance library for **volume approximation** and **sampling** of conv
 | Boost | ≥ 1.56 (headers + `random`, `math`) |
 
 Optional:
-* **LP-solve 5.5** – needed for VPolytope inner ball computation (otherwise auto-disabled)
+* **LP-solve 5.5** - needed for VPolytope inner ball computation (otherwise auto-disabled)
 
 ---
 
@@ -237,7 +237,7 @@ volestipy/
 ├── pyproject.toml
 ├── README.md
 ├── external/
-│   └── volesti/                 # git submodule – volesti library
+│   └── volesti/                 # git submodule - volesti library
 ├── src/
 │   └── bindings/
 │       └── volesti_bindings.cpp # pybind11 binding definitions
@@ -257,9 +257,9 @@ volestipy/
 
 ## Relationship to Other Projects
 
-* **[volesti](https://github.com/GeomScale/volesti)** – the underlying C++ library
-* **[dingo](https://github.com/GeomScale/dingo)** – metabolic network analysis using volesti
-* **volestipy** – a standalone, general-purpose Python binding via pybind11
+* **[volesti](https://github.com/GeomScale/volesti)** - the underlying C++ library
+* **[dingo](https://github.com/GeomScale/dingo)** - metabolic network analysis using volesti
+* **volestipy** - a standalone, general-purpose Python binding via pybind11
 
 ---
 
@@ -267,5 +267,5 @@ volestipy/
 
 GNU Lesser General Public License v3.0 — see [LICENSE](LICENSE).
 
-Copyright (c) 2012–2024 Vissarion Fisikopoulos, Apostolos Chalkis, Elias Tsigaridas
+Copyright (c) 2012-2024 Vissarion Fisikopoulos, Apostolos Chalkis, Elias Tsigaridas
 and contributors.

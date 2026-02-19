@@ -1,5 +1,5 @@
 """
-volestipy – Python bindings for the volesti C++ library.
+volestipy - Python bindings for the volesti C++ library.
 
 This module re-exports the C++ pybind11 extension and adds
 convenient Python-level wrappers and utilities.
@@ -74,7 +74,7 @@ class HPolytope:
     """
     H-Polytope: a convex polytope in half-space representation.
 
-        P = { x ∈ ℝ^d : A x ≤ b }
+        P = { x ∈ R^d : A x ≤ b }
 
     Parameters
     ----------
@@ -174,14 +174,13 @@ class HPolytope:
         walk_type : str
             MCMC walk type. Supported options:
 
-            * ``'cdhr'`` – Coordinate Directions Hit-and-Run (default)
-            * ``'rdhr'`` – Random Directions Hit-and-Run
-            * ``'ball_walk'`` – Ball Walk
-            * ``'billiard'`` – Billiard Walk
-            * ``'accelerated_billiard'`` – Accelerated Billiard Walk
-            * ``'dikin'`` – Dikin Walk
-            * ``'john'`` – John Walk
-            * ``'vaidya'`` – Vaidya Walk
+            * ``'cdhr'`` - Coordinate Directions Hit-and-Run (default)
+            * ``'rdhr'`` - Random Directions Hit-and-Run
+            * ``'ball_walk'`` - Ball Walk
+            * ``'billiard'`` - Billiard Walk (Accelerated Billiard Walk)
+            * ``'dikin'`` - Dikin Walk
+            * ``'john'`` - John Walk
+            * ``'vaidya'`` - Vaidya Walk
         seed : int
             Random number generator seed.
 
