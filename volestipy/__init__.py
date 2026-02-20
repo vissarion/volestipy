@@ -166,7 +166,7 @@ class HPolytope:
         n_samples: int = 1000,
         walk_length: int = 1,
         burn_in: int = 0,
-        walk_type: str = "cdhr",
+        walk_type: str = "billiard",
         seed: int = 0,
     ) -> np.ndarray:
         """
@@ -327,6 +327,74 @@ class HPolytope:
         round_val : float
         """
         T, T_shift, rv = self._poly.round_max_ellipsoid()
+        return np.array(T), np.array(T_shift), float(rv)
+
+    def round_log_barrier(self, max_iterations: int = 5, max_eig_ratio: float = 6.0):
+        """
+        Round using the log-barrier (analytic center) ellipsoid.
+
+        The analytic center is the minimizer of ``-∑ log(bᵢ - aᵢᵀx)``.
+        Its Hessian defines the rounding ellipsoid.
+
+        Parameters
+        ----------
+        max_iterations : int
+            Maximum rounding iterations (default 5).
+        max_eig_ratio : float
+            Stop when max/min eigenvalue ratio ≤ this value (default 6).
+
+        Returns
+        -------
+        T : numpy.ndarray of shape (d, d)
+            Linear transformation applied to the polytope.
+        T_shift : numpy.ndarray of shape (d,)
+            Translation applied to the polytope.
+        round_val : float
+            Absolute value of det(T); measures volume change.
+        """
+        T, T_shift, rv = self._poly.round_log_barrier(max_iterations, max_eig_ratio)
+        return np.array(T), np.array(T_shift), float(rv)
+
+    def round_volumetric_barrier(self, max_iterations: int = 5, max_eig_ratio: float = 6.0):
+        """
+        Round using the volumetric-barrier ellipsoid.
+
+        The volumetric center minimizes ``logdet(∇²f(x))`` where ``f``
+        is the log-barrier.  Tends to produce more uniform rounding than
+        the log-barrier alone.
+
+        Parameters
+        ----------
+        max_iterations : int
+        max_eig_ratio : float
+
+        Returns
+        -------
+        T, T_shift, round_val
+            See :meth:`round_log_barrier`.
+        """
+        T, T_shift, rv = self._poly.round_volumetric_barrier(max_iterations, max_eig_ratio)
+        return np.array(T), np.array(T_shift), float(rv)
+
+    def round_vaidya_barrier(self, max_iterations: int = 5, max_eig_ratio: float = 6.0):
+        """
+        Round using the Vaidya-barrier ellipsoid.
+
+        The Vaidya center minimizes ``logdet(∇²f(x)) + (d/m) f(x)``,
+        interpolating between the volumetric and analytic centers.
+        Often the best choice for high-dimensional polytopes.
+
+        Parameters
+        ----------
+        max_iterations : int
+        max_eig_ratio : float
+
+        Returns
+        -------
+        T, T_shift, round_val
+            See :meth:`round_log_barrier`.
+        """
+        T, T_shift, rv = self._poly.round_vaidya_barrier(max_iterations, max_eig_ratio)
         return np.array(T), np.array(T_shift), float(rv)
 
     # ── Dunder ────────────────────────────────────────────────────────────────

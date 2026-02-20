@@ -385,6 +385,15 @@ py::tuple hpoly_round_max_inscribed_ellipsoid(HPolytopeType& P) {
     return py::make_tuple(T, shift, round_val);
 }
 
+// Barrier-based rounding helpers (ellipsoid_type is a compile-time template parameter)
+template <int EllType>
+py::tuple hpoly_round_barrier(HPolytopeType& P, int max_iterations, NT max_eig_ratio) {
+    auto [T, shift, round_val] =
+        inscribed_ellipsoid_rounding<MatrixXd, VectorXd, NT, HPolytopeType, EllType>(
+            P, max_iterations, max_eig_ratio);
+    return py::make_tuple(T, shift, round_val);
+}
+
 
 // ============================================================
 // Module definition
@@ -624,6 +633,82 @@ PYBIND11_MODULE(_volestipy, m) {
         }, R"pbdoc(
         Round the polytope by mapping the maximum inscribed ellipsoid to the
         unit ball. Returns (T, T_shift, round_value).
+        )pbdoc")
+        .def("round_log_barrier", [](HPolytopeType& P,
+                                     int max_iterations,
+                                     NT max_eig_ratio) {
+            return hpoly_round_barrier<EllipsoidType::LOG_BARRIER>(
+                P, max_iterations, max_eig_ratio);
+        }, py::arg("max_iterations") = 5,
+           py::arg("max_eig_ratio") = NT(6),
+        R"pbdoc(
+        Round the polytope using the log-barrier (analytic center) ellipsoid.
+
+        The analytic center is the minimizer of -sum log(b_i - a_i^T x).
+        The Hessian of the log-barrier at the center defines the rounding
+        ellipsoid.
+
+        Parameters
+        ----------
+        max_iterations : int
+            Maximum rounding iterations (default 5).
+        max_eig_ratio : float
+            Stop when max/min eigenvalue ratio <= this value (default 6).
+
+        Returns
+        -------
+        T : ndarray (d, d)
+        T_shift : ndarray (d,)
+        round_val : float
+        )pbdoc")
+        .def("round_volumetric_barrier", [](HPolytopeType& P,
+                                            int max_iterations,
+                                            NT max_eig_ratio) {
+            return hpoly_round_barrier<EllipsoidType::VOLUMETRIC_BARRIER>(
+                P, max_iterations, max_eig_ratio);
+        }, py::arg("max_iterations") = 5,
+           py::arg("max_eig_ratio") = NT(6),
+        R"pbdoc(
+        Round the polytope using the volumetric-barrier ellipsoid.
+
+        The volumetric center minimizes logdet(∇²f(x)) where f is the
+        log-barrier.  Produces a more uniform rounding than the log-barrier.
+
+        Parameters
+        ----------
+        max_iterations : int
+        max_eig_ratio : float
+
+        Returns
+        -------
+        T : ndarray (d, d)
+        T_shift : ndarray (d,)
+        round_val : float
+        )pbdoc")
+        .def("round_vaidya_barrier", [](HPolytopeType& P,
+                                        int max_iterations,
+                                        NT max_eig_ratio) {
+            return hpoly_round_barrier<EllipsoidType::VAIDYA_BARRIER>(
+                P, max_iterations, max_eig_ratio);
+        }, py::arg("max_iterations") = 5,
+           py::arg("max_eig_ratio") = NT(6),
+        R"pbdoc(
+        Round the polytope using the Vaidya-barrier ellipsoid.
+
+        The Vaidya center minimizes logdet(∇²f(x)) + (d/m) f(x).  It
+        interpolates between the volumetric and analytic centers and is
+        often the best choice for high-dimensional polytopes.
+
+        Parameters
+        ----------
+        max_iterations : int
+        max_eig_ratio : float
+
+        Returns
+        -------
+        T : ndarray (d, d)
+        T_shift : ndarray (d,)
+        round_val : float
         )pbdoc");
 
     // ----------------------------------------------------------
