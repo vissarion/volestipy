@@ -44,6 +44,12 @@
 #include "generators/boost_random_number_generator.hpp"
 #include "generators/known_polytope_generators.h"
 
+// Diagnostics
+#include <unsupported/Eigen/FFT>
+#include "diagnostics/effective_sample_size.hpp"
+#include "diagnostics/univariate_psrf.hpp"
+#include "diagnostics/multivariate_psrf.hpp"
+
 // Preprocessing
 #include "preprocess/min_sampling_covering_ellipsoid_rounding.hpp"
 #include "preprocess/inscribed_ellipsoid_rounding.hpp"
@@ -828,6 +834,80 @@ A : ndarray, shape (m, d)
     Constraint matrix.
 b : ndarray, shape (m,)
     Right-hand side vector.  The polytope is { x : A x <= b }.
+)");
+
+    // ── Diagnostics ──────────────────────────────────────────────────────────
+
+    m.def("ess", [](const MatrixXd& samples) {
+        if (samples.cols() < 4)
+            throw std::invalid_argument("ESS requires at least 4 samples.");
+        unsigned int min_ess = 0;
+        VectorXd ess_vec = effective_sample_size<NT, VectorXd, MatrixXd>(samples, min_ess);
+        return py::make_tuple(ess_vec, (int)min_ess);
+    }, py::arg("samples"),
+    R"(Compute the Effective Sample Size (ESS) per coordinate.
+
+Uses the FFT-based autocorrelation method (Geyer's initial monotone
+sequence estimator).
+
+Parameters
+----------
+samples : ndarray, shape (d, n_samples)
+    Sample matrix, columns are points (same layout as returned by
+    HPolytope.sample / VPolytope.sample).
+
+Returns
+-------
+ess_per_dim : ndarray, shape (d,)
+    ESS for each coordinate.
+min_ess : int
+    Minimum ESS across all coordinates.
+)");
+
+    m.def("univariate_psrf", [](const MatrixXd& samples) {
+        if (samples.cols() < 4)
+            throw std::invalid_argument("PSRF requires at least 4 samples.");
+        VectorXd psrf_vec = univariate_psrf<NT, VectorXd, MatrixXd>(samples);
+        return psrf_vec;
+    }, py::arg("samples"),
+    R"(Compute the univariate Gelman-Rubin PSRF per coordinate.
+
+Splits the chain in two halves and computes the potential scale
+reduction factor R̂ for each coordinate (Gelman & Rubin, 1992).
+Values close to 1.0 indicate convergence.
+
+Parameters
+----------
+samples : ndarray, shape (d, n_samples)
+    Sample matrix, columns are points.
+
+Returns
+-------
+psrf : ndarray, shape (d,)
+    R̂ value for each coordinate.  Rule-of-thumb: R̂ < 1.1 is good.
+)");
+
+    m.def("multivariate_psrf", [](const MatrixXd& samples) {
+        if (samples.cols() < 4)
+            throw std::invalid_argument("Multivariate PSRF requires at least 4 samples.");
+        NT R = multivariate_psrf<NT, VectorXd, MatrixXd>(samples);
+        return R;
+    }, py::arg("samples"),
+    R"(Compute the multivariate Brooks-Gelman PSRF.
+
+Splits the chain in two halves and computes the multivariate potential
+scale reduction factor based on the largest eigenvalue of W⁻¹B
+(Brooks & Gelman, 1998).
+
+Parameters
+----------
+samples : ndarray, shape (d, n_samples)
+    Sample matrix, columns are points.
+
+Returns
+-------
+R : float
+    Multivariate R̂.  Rule-of-thumb: R̂ < 1.1 indicates convergence.
 )");
 
     // Version info

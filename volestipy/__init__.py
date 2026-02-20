@@ -71,6 +71,9 @@ from volestipy._volestipy import (  # noqa: E402  # type: ignore[import]
     vpoly_volume,
     vpoly_sample,
     hpoly_birkhoff,
+    ess,
+    univariate_psrf,
+    multivariate_psrf,
 )
 
 
@@ -579,6 +582,9 @@ __all__ = [
     "hpoly_sample",
     "vpoly_volume",
     "vpoly_sample",
+    "ess",
+    "univariate_psrf",
+    "multivariate_psrf",
 ]
 
 __version__ = "0.1.0"
