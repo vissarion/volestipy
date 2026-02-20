@@ -6,6 +6,8 @@
 """
 Tests for volestipy.HPolytope - construction, membership, sampling, volume.
 """
+from __future__ import annotations
+
 import math
 import numpy as np
 import pytest
