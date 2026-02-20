@@ -24,16 +24,53 @@ Quick start
 """
 from __future__ import annotations
 
+import importlib
+import os
+import sys
+from pathlib import Path
+from typing import Optional
+
 import numpy as np
 
+# ── locate the compiled extension ────────────────────────────────────────────
+# When installed the .so sits inside the volestipy package directory.
+# When built in-place (build_ext --inplace) it sits at the repo root.
+def _import_extension():
+    try:
+        from volestipy import _volestipy  # type: ignore[no-redef]
+        return _volestipy
+    except ImportError:
+        pass
+
+    # Try the repo root (in-place build)
+    repo_root = Path(__file__).parent.parent
+    sys.path.insert(0, str(repo_root))
+    try:
+        import _volestipy  # type: ignore[import]
+        return _volestipy
+    except ImportError as exc:
+        raise ImportError(
+            "Could not import the compiled _volestipy extension.\n"
+            "Please build the extension first:\n"
+            "  pip install -e .\n"
+            "or:\n"
+            "  mkdir build && cd build\n"
+            "  cmake .. -DVOLESTI_INCLUDE_DIR=/path/to/volesti/include\n"
+            "  cmake --build . -j4\n"
+        ) from exc
+
+
+_ext = _import_extension()
+
 # ── Re-export the pybind11 classes ───────────────────────────────────────────
-from volestipy._volestipy import (  # type: ignore[import]
+from volestipy._volestipy import (  # noqa: E402  # type: ignore[import]
     HPolytope as _HPolytope,
     hpoly_volume,
     hpoly_sample,
     VPolytope as _VPolytope,
     vpoly_volume,
     vpoly_sample,
+    hpoly_birkhoff,
 )
 
 
@@ -485,6 +522,50 @@ def cross_polytope(d: int, r: float = 1.0) -> HPolytope:
     return HPolytope(A, b)
 
 
+def birkhoff_polytope(n: int) -> HPolytope:
+    """
+    Create the Birkhoff polytope B(n) as an H-polytope.
+
+    The Birkhoff polytope B(n) is the convex polytope of n×n doubly
+    stochastic matrices — non-negative real matrices whose rows and
+    columns each sum to 1.  By the Birkhoff-von Neumann theorem its
+    vertices are exactly the n×n permutation matrices.
+
+    The polytope is represented in a reduced coordinate space of
+    dimension d = (n-1)² obtained by eliminating the redundant last
+    row and last column of the stochastic matrix.
+
+    Properties
+    ----------
+    * Dimension  : (n-1)²
+    * Vertices   : n!  (permutation matrices)
+    * Facets     : n²  (non-negativity constraints)
+
+    Parameters
+    ----------
+    n : int
+        Matrix size (n >= 2).  Notable cases:
+
+        - B(2) : 1-dimensional line segment  [0, 1]
+        - B(3) : 4-dimensional polytope with 6 vertices
+        - B(4) : 9-dimensional polytope with 24 vertices
+
+    Returns
+    -------
+    HPolytope
+        The Birkhoff polytope B(n).
+
+    Examples
+    --------
+    >>> P = birkhoff_polytope(3)
+    >>> P.dimension()
+    4
+    >>> vol = P.volume(error=0.1)
+    """
+    A, b = hpoly_birkhoff(n)
+    return HPolytope(A, b)
+
+
 # ── Public API ────────────────────────────────────────────────────────────────
 __all__ = [
     "HPolytope",
@@ -492,6 +573,8 @@ __all__ = [
     "hypercube",
     "hypersimplex",
     "cross_polytope",
+    "birkhoff_polytope",
+    "hpoly_birkhoff",
     "hpoly_volume",
     "hpoly_sample",
     "vpoly_volume",

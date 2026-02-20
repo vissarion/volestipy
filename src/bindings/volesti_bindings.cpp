@@ -42,6 +42,7 @@
 
 // Generators
 #include "generators/boost_random_number_generator.hpp"
+#include "generators/known_polytope_generators.h"
 
 // Preprocessing
 #include "preprocess/min_sampling_covering_ellipsoid_rounding.hpp"
@@ -798,6 +799,36 @@ PYBIND11_MODULE(_volestipy, m) {
        py::arg("algorithm") = "cooling_balls",
        py::arg("walk_type") = "cdhr",
     "Compute the volume of the V-polytope (convex hull of rows of V).");
+
+    // ── Birkhoff polytope generator ──────────────────────────────────────────
+    m.def("hpoly_birkhoff", [](unsigned int n) {
+        if (n < 2)
+            throw std::invalid_argument(
+                "Birkhoff polytope requires n >= 2 (n=1 is a single point).");
+        HPolytopeType P = generate_birkhoff<HPolytopeType>(n);
+        MatrixXd A = P.get_mat();
+        VectorXd b = P.get_vec();
+        return py::make_tuple(A, b);
+    }, py::arg("n"),
+    R"(Generate the Birkhoff polytope B(n) in H-representation.
+
+The Birkhoff polytope B(n) is the convex polytope of n×n doubly
+stochastic matrices (non-negative real entries whose rows and columns
+each sum to 1).  It lives in dimension d = (n-1)^2.
+
+Parameters
+----------
+n : int
+    Matrix size (n >= 2).  B(2) is a line segment, B(3) has
+    dimension 4, B(4) has dimension 9, etc.
+
+Returns
+-------
+A : ndarray, shape (m, d)
+    Constraint matrix.
+b : ndarray, shape (m,)
+    Right-hand side vector.  The polytope is { x : A x <= b }.
+)");
 
     // Version info
     m.attr("__version__") = "0.1.0";
