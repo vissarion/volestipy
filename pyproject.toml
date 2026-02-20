@@ -21,15 +21,14 @@ keywords = [
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
     "Programming Language :: Python :: 3",
     "Programming Language :: C++",
-    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Mathematics :: Optimization",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0", "matplotlib", "scipy"]
 
 [project.urls]
-Homepage = "https://github.com/GeomScale/volesti"
 Repository = "https://github.com/GeomScale/volestipy"

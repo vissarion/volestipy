@@ -24,46 +24,10 @@ Quick start
 """
 from __future__ import annotations
 
-import importlib
-import os
-import sys
-from pathlib import Path
-from typing import Optional
-
 import numpy as np
 
-# ── locate the compiled extension ────────────────────────────────────────────
-# When installed the .so sits inside the volestipy package directory.
-# When built in-place (build_ext --inplace) it sits at the repo root.
-def _import_extension():
-    try:
-        from volestipy import _volestipy  # type: ignore[no-redef]
-        return _volestipy
-    except ImportError:
-        pass
-
-    # Try the repo root (in-place build)
-    repo_root = Path(__file__).parent.parent
-    sys.path.insert(0, str(repo_root))
-    try:
-        import _volestipy  # type: ignore[import]
-        return _volestipy
-    except ImportError as exc:
-        raise ImportError(
-            "Could not import the compiled _volestipy extension.\n"
-            "Please build the extension first:\n"
-            "  pip install -e .\n"
-            "or:\n"
-            "  mkdir build && cd build\n"
-            "  cmake .. -DVOLESTI_INCLUDE_DIR=/path/to/volesti/include\n"
-            "  cmake --build . -j4\n"
-        ) from exc
-
-
-_ext = _import_extension()
-
 # ── Re-export the pybind11 classes ───────────────────────────────────────────
-from volestipy._volestipy import (  # noqa: E402  # type: ignore[import]
+from volestipy._volestipy import (  # type: ignore[import]
     HPolytope as _HPolytope,
     hpoly_volume,
     hpoly_sample,
@@ -120,7 +84,7 @@ class HPolytope:
 
     @property
     def A(self) -> np.ndarray:
-        """Constraint matrix A (shape m×d)."""
+        """Constraint matrix A (shape mxd)."""
         return np.array(self._poly.get_mat())
 
     @property
@@ -373,7 +337,7 @@ class VPolytope:
 
     @property
     def V(self) -> np.ndarray:
-        """Vertex matrix (shape n_vertices×d)."""
+        """Vertex matrix (shape n_verticesxd)."""
         return np.array(self._poly.get_mat())
 
     def is_in(self, point: np.ndarray) -> bool:

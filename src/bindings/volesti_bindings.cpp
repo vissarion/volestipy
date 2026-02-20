@@ -67,23 +67,6 @@ typedef Eigen::Matrix<NT, Eigen::Dynamic, 1> VectorXd;
 
 
 // ============================================================
-// Helper: convert list-of-lists to Eigen matrix
-// ============================================================
-MatrixXd list_to_matrix(const std::vector<std::vector<double>>& data) {
-    if (data.empty()) return MatrixXd(0, 0);
-    int rows = data.size();
-    int cols = data[0].size();
-    MatrixXd M(rows, cols);
-    for (int i = 0; i < rows; ++i) {
-        if ((int)data[i].size() != cols)
-            throw std::invalid_argument("All rows must have the same length.");
-        for (int j = 0; j < cols; ++j)
-            M(i, j) = data[i][j];
-    }
-    return M;
-}
-
-// ============================================================
 // Sampling helper: convert list<Point> -> Eigen matrix (points as columns)
 // ============================================================
 MatrixXd points_to_matrix(const std::list<Point>& pts) {
