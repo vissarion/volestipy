@@ -671,7 +671,7 @@ PYBIND11_MODULE(_volestipy, m) {
         R"pbdoc(
         Round the polytope using the volumetric-barrier ellipsoid.
 
-        The volumetric center minimizes logdet(∇²f(x)) where f is the
+        The volumetric center minimizes logdet(grad^2f(x)) where f is the
         log-barrier.  Produces a more uniform rounding than the log-barrier.
 
         Parameters
@@ -695,7 +695,7 @@ PYBIND11_MODULE(_volestipy, m) {
         R"pbdoc(
         Round the polytope using the Vaidya-barrier ellipsoid.
 
-        The Vaidya center minimizes logdet(∇²f(x)) + (d/m) f(x).  It
+        The Vaidya center minimizes logdet(grad^2f(x)) + (d/m) f(x).  It
         interpolates between the volumetric and analytic centers and is
         often the best choice for high-dimensional polytopes.
 
@@ -891,7 +891,7 @@ PYBIND11_MODULE(_volestipy, m) {
        py::arg("walk_type") = "cdhr",
     "Compute the volume of the V-polytope (convex hull of rows of V).");
 
-    // ── Birkhoff polytope generator ──────────────────────────────────────────
+    // -- Birkhoff polytope generator ------------------------------------------
     m.def("hpoly_birkhoff", [](unsigned int n) {
         if (n < 2)
             throw std::invalid_argument(
@@ -903,7 +903,7 @@ PYBIND11_MODULE(_volestipy, m) {
     }, py::arg("n"),
     R"(Generate the Birkhoff polytope B(n) in H-representation.
 
-The Birkhoff polytope B(n) is the convex polytope of n×n doubly
+The Birkhoff polytope B(n) is the convex polytope of nxn doubly
 stochastic matrices (non-negative real entries whose rows and columns
 each sum to 1).  It lives in dimension d = (n-1)^2.
 
@@ -921,7 +921,7 @@ b : ndarray, shape (m,)
     Right-hand side vector.  The polytope is { x : A x <= b }.
 )");
 
-    // ── Diagnostics ──────────────────────────────────────────────────────────
+    // -- Diagnostics ----------------------------------------------------------
 
     m.def("ess", [](const MatrixXd& samples) {
         if (samples.cols() < 4)
@@ -958,7 +958,7 @@ min_ess : int
     R"(Compute the univariate Gelman-Rubin PSRF per coordinate.
 
 Splits the chain in two halves and computes the potential scale
-reduction factor R̂ for each coordinate (Gelman & Rubin, 1992).
+reduction factor Rhat for each coordinate (Gelman & Rubin, 1992).
 Values close to 1.0 indicate convergence.
 
 Parameters
@@ -969,7 +969,7 @@ samples : ndarray, shape (d, n_samples)
 Returns
 -------
 psrf : ndarray, shape (d,)
-    R̂ value for each coordinate.  Rule-of-thumb: R̂ < 1.1 is good.
+    Rhat value for each coordinate.  Rule-of-thumb: Rhat < 1.1 is good.
 )");
 
     m.def("multivariate_psrf", [](const MatrixXd& samples) {
@@ -981,7 +981,7 @@ psrf : ndarray, shape (d,)
     R"(Compute the multivariate Brooks-Gelman PSRF.
 
 Splits the chain in two halves and computes the multivariate potential
-scale reduction factor based on the largest eigenvalue of W⁻¹B
+scale reduction factor based on the largest eigenvalue of W^-1B
 (Brooks & Gelman, 1998).
 
 Parameters
@@ -992,7 +992,7 @@ samples : ndarray, shape (d, n_samples)
 Returns
 -------
 R : float
-    Multivariate R̂.  Rule-of-thumb: R̂ < 1.1 indicates convergence.
+    Multivariate Rhat.  Rule-of-thumb: Rhat < 1.1 indicates convergence.
 )");
 
     // Version info

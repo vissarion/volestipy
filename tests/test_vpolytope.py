@@ -22,8 +22,7 @@ pytestmark = pytest.mark.skipif(not HAVE_EXT,
     reason="C++ extension _volestipy not built")
 
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
-
+# --- Helpers ---
 def make_simplex_vpoly(d: int) -> VPolytope:
     """Standard simplex as V-polytope: origin + d unit vectors."""
     V = np.vstack([np.zeros(d), np.eye(d)])
@@ -36,8 +35,7 @@ def make_cube_vpoly_2d() -> VPolytope:
     return VPolytope(V)
 
 
-# ── Construction tests ────────────────────────────────────────────────────────
-
+# --- Construction tests ---
 class TestVPolytopeConstruction:
     def test_dimension(self):
         P = make_simplex_vpoly(3)
@@ -62,8 +60,7 @@ class TestVPolytopeConstruction:
         assert "VPolytope" in repr(P)
 
 
-# ── Membership tests ──────────────────────────────────────────────────────────
-
+# --- Membership tests ---
 class TestVPolytopeMembership:
     def test_origin_in_simplex(self):
         P = make_simplex_vpoly(3)
@@ -93,8 +90,7 @@ class TestVPolytopeMembership:
         assert P.is_in(np.array([1.0, 1.0]))
 
 
-# ── Inner ball tests ──────────────────────────────────────────────────────────
-
+# --- Inner ball tests ---
 class TestVPolytopeInnerBall:
     def test_inner_ball_square(self):
         P = make_cube_vpoly_2d()
@@ -109,8 +105,7 @@ class TestVPolytopeInnerBall:
         assert P.is_in(center)
 
 
-# ── Sampling tests ────────────────────────────────────────────────────────────
-
+# --- Sampling tests ---
 class TestVPolytopeUniformSampling:
     @pytest.mark.parametrize("walk_type", ["cdhr", "rdhr", "ball_walk", "billiard"])
     def test_sample_shape(self, walk_type):
@@ -139,8 +134,7 @@ class TestVPolytopeUniformSampling:
             assert P.is_in(samples[:, i])
 
 
-# ── Volume tests ──────────────────────────────────────────────────────────────
-
+# --- Volume tests ---
 class TestVPolytopeVolume:
     #cooling_gaussians not applicable to V-polytopes
     @pytest.mark.parametrize("volume_algo", ["cooling_balls", "sequence_of_balls"]) 

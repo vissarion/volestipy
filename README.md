@@ -1,6 +1,6 @@
 # volestipy
 
-Python bindings for the [volesti](https://github.com/GeomScale/volesti) C++ library —
+Python bindings for the [volesti](https://github.com/GeomScale/volesti) C++ library --
 a high-performance library for **volume approximation** and **sampling** of convex bodies
 (H-polytopes, V-polytopes).
 
@@ -13,13 +13,13 @@ a high-performance library for **volume approximation** and **sampling** of conv
 
 | Feature | Details |
 |---|---|
-| **Polytope types** | `HPolytope` (`Ax ≤ b`) · `VPolytope` (convex hull of vertices) |
-| **Uniform sampling** | CDHR · RDHR · Ball Walk · Billiard Walk · Accelerated Billiard Walk · Dikin Walk · John Walk · Vaidya Walk |
-| **Gaussian sampling** | Gaussian CDHR · Gaussian RDHR · Gaussian Ball Walk |
+| **Polytope types** | `HPolytope` (`Ax <= b`) * `VPolytope` (convex hull of vertices) |
+| **Uniform sampling** | CDHR * RDHR * Ball Walk * Billiard Walk * Accelerated Billiard Walk * Dikin Walk * John Walk * Vaidya Walk |
+| **Gaussian sampling** | Gaussian CDHR * Gaussian RDHR * Gaussian Ball Walk |
 | **Exponential sampling** | Exponential HMC |
-| **Volume algorithms** | Cooling Balls · Cooling Gaussians · Sequence of Balls |
-| **Rounding** | Minimum covering ellipsoid · Maximum inscribed ellipsoid |
-| **Convenience constructors** | `hypercube(d)` · `hypersimplex(d)` · `cross_polytope(d)` |
+| **Volume algorithms** | Cooling Balls * Cooling Gaussians * Sequence of Balls |
+| **Rounding** | Minimum covering ellipsoid * Maximum inscribed ellipsoid |
+| **Convenience constructors** | `hypercube(d)` * `hypersimplex(d)` * `cross_polytope(d)` |
 
 ---
 
@@ -27,12 +27,12 @@ a high-performance library for **volume approximation** and **sampling** of conv
 
 | Dependency | Version |
 |---|---|
-| C++ compiler | GCC ≥ 9 or Clang ≥ 11, C++17 |
-| CMake | ≥ 3.15 |
-| Python | ≥ 3.8 |
-| pybind11 | ≥ 2.11 |
-| Eigen3 | ≥ 3.3 |
-| Boost | ≥ 1.56 (headers + `random`, `math`) |
+| C++ compiler | GCC >= 9 or Clang >= 11, C++17 |
+| CMake | >= 3.15 |
+| Python | >= 3.8 |
+| pybind11 | >= 2.11 |
+| Eigen3 | >= 3.3 |
+| Boost | >= 1.56 (headers + `random`, `math`) |
 
 Optional:
 * **LP-solve 5.5** - needed for VPolytope inner ball computation (otherwise auto-disabled)
@@ -107,7 +107,7 @@ print(volestipy.__version__)   # 0.1.0
 import numpy as np
 from volestipy import HPolytope, VPolytope, hypercube, hypersimplex
 
-# ── H-Polytope: 3-D hypercube [-1, 1]^3 ─────────────────────────────────────
+# --- H-Polytope: 3-D hypercube [-1, 1]^3 ---
 d = 3
 P = hypercube(d)
 
@@ -120,15 +120,15 @@ g_samples = P.gaussian_sample(n_samples=500, a=1.5, seed=0)
 
 # Volume estimation (true = 8.0)
 vol = P.volume(error=0.1, algorithm="cooling_balls")
-print(f"Volume ≈ {vol:.2f}  (true = {2**d})")
+print(f"Volume ~= {vol:.2f}  (true = {2**d})")
 
-# ── Build an arbitrary H-polytope ─────────────────────────────────────────────
+# --- Build an arbitrary H-polytope ---
 A = np.vstack([np.eye(d), -np.eye(d)])   # 2d inequalities
 b = 2.0 * np.ones(2 * d)
 P2 = HPolytope(A, b)
 center, radius = P2.compute_inner_ball()
 
-# ── V-Polytope: 2-D triangle ─────────────────────────────────────────────────
+# --- V-Polytope: 2-D triangle ---
 V = np.array([[0., 0.], [1., 0.], [0., 1.]])
 T = VPolytope(V)
 t_samples = T.sample(n_samples=300, seed=0)
@@ -142,7 +142,7 @@ vol_t = T.volume(error=0.2)
 ### `HPolytope(A, b)`
 
 ```
-P = { x ∈ ℝ^d : A x ≤ b }
+P = { x in R^d : A x <= b }
 ```
 
 | Method | Description |
@@ -204,8 +204,8 @@ P = conv{ rows of V }
 from volestipy import hypercube, hypersimplex, cross_polytope
 
 P = hypercube(d, r=1.0)        # [-r, r]^d
-S = hypersimplex(d)             # { x≥0, Σx_i ≤ 1 }
-C = cross_polytope(d, r=1.0)   # { Σ|x_i| ≤ r }
+S = hypersimplex(d)             # { x>=0, Sigmax_i <= 1 }
+C = cross_polytope(d, r=1.0)   # { Sigma|x_i| <= r }
 ```
 
 ---
@@ -232,25 +232,25 @@ pytest tests/ -v
 
 ```
 volestipy/
-├── CMakeLists.txt               # CMake build script
-├── setup.py                     # Python packaging (CMake-based)
-├── pyproject.toml
-├── README.md
-├── external/
-│   └── volesti/                 # git submodule - volesti library
-├── src/
-│   └── bindings/
-│       └── volesti_bindings.cpp # pybind11 binding definitions
-├── volestipy/
-│   └── __init__.py              # Python wrapper + convenience API
-├── tests/
-│   ├── conftest.py
-│   ├── test_hpolytope.py
-│   ├── test_vpolytope.py
-│   └── test_integration.py
-└── examples/
-    ├── example_hypercube.py
-    └── example_random_polytope.py
+?-- CMakeLists.txt               # CMake build script
+?-- setup.py                     # Python packaging (CMake-based)
+?-- pyproject.toml
+?-- README.md
+?-- external/
+?   ?-- volesti/                 # git submodule - volesti library
+?-- src/
+?   ?-- bindings/
+?       ?-- volesti_bindings.cpp # pybind11 binding definitions
+?-- volestipy/
+?   ?-- __init__.py              # Python wrapper + convenience API
+?-- tests/
+?   ?-- conftest.py
+?   ?-- test_hpolytope.py
+?   ?-- test_vpolytope.py
+?   ?-- test_integration.py
+?-- examples/
+    ?-- example_hypercube.py
+    ?-- example_random_polytope.py
 ```
 
 ---
@@ -265,7 +265,7 @@ volestipy/
 
 ## License
 
-GNU Lesser General Public License v3.0 — see [LICENSE](LICENSE).
+GNU Lesser General Public License v3.0 -- see [LICENSE](LICENSE).
 
 Copyright (c) 2012-2024 Vissarion Fisikopoulos, Apostolos Chalkis, Elias Tsigaridas
 and contributors.

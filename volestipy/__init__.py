@@ -32,7 +32,7 @@ from typing import Optional
 
 import numpy as np
 
-# ── locate the compiled extension ────────────────────────────────────────────
+# --- locate the compiled extension ---
 # When installed the .so sits inside the volestipy package directory.
 # When built in-place (build_ext --inplace) it sits at the repo root.
 def _import_extension():
@@ -62,7 +62,7 @@ def _import_extension():
 
 _ext = _import_extension()
 
-# ── Re-export the pybind11 classes ───────────────────────────────────────────
+# --- Re-export the pybind11 classes ---
 from volestipy._volestipy import (  # noqa: E402  # type: ignore[import]
     HPolytope as _HPolytope,
     hpoly_volume,
@@ -77,13 +77,12 @@ from volestipy._volestipy import (  # noqa: E402  # type: ignore[import]
 )
 
 
-# ── High-level Python wrappers ────────────────────────────────────────────────
-
+# --- High-level Python wrappers ---
 class HPolytope:
     """
     H-Polytope: a convex polytope in half-space representation.
 
-        P = { x ∈ R^d : A x ≤ b }
+        P = { x in R^d : A x <= b }
 
     Parameters
     ----------
@@ -113,7 +112,7 @@ class HPolytope:
             raise ValueError("b must be a 1-D array with length A.shape[0].")
         self._poly = _HPolytope(A, b)
 
-    # ── Metadata ─────────────────────────────────────────────────────────────
+    # -- Metadata -------------------------------------------------------------
     def dimension(self) -> int:
         """Return the ambient dimension d."""
         return self._poly.dimension()
@@ -160,7 +159,7 @@ class HPolytope:
         self._poly.normalize()
         return self
 
-    # ── Sampling ─────────────────────────────────────────────────────────────
+    # -- Sampling -------------------------------------------------------------
     def sample(
         self,
         n_samples: int = 1000,
@@ -212,14 +211,14 @@ class HPolytope:
         seed: int = 0,
     ) -> np.ndarray:
         """
-        Draw samples from the Gaussian distribution exp(-a ‖x‖²) restricted
+        Draw samples from the Gaussian distribution exp(-a ||x||^2) restricted
         to this polytope.
 
         Parameters
         ----------
         n_samples, walk_length, burn_in, seed : see :meth:`sample`.
         a : float
-            Variance parameter (larger → more concentrated).
+            Variance parameter (larger -> more concentrated).
         walk_type : str
             ``'cdhr'``, ``'rdhr'``, or ``'ball_walk'``.
 
@@ -242,7 +241,7 @@ class HPolytope:
         seed: int = 0,
     ) -> np.ndarray:
         """
-        Draw samples from the exponential distribution exp(a · cᵀ x) restricted
+        Draw samples from the exponential distribution exp(a * cT x) restricted
         to this polytope.
 
         Parameters
@@ -264,7 +263,7 @@ class HPolytope:
             self._poly.exponential_sample(n_samples, walk_length, burn_in, c, a, walk_type, seed)
         )
 
-    # ── Volume ────────────────────────────────────────────────────────────────
+    # -- Volume ----------------------------------------------------------------
     def volume(
         self,
         error: float = 0.1,
@@ -297,7 +296,7 @@ class HPolytope:
         """
         return float(self._poly.volume(error, walk_length, algorithm, walk_type))
 
-    # ── Rounding ─────────────────────────────────────────────────────────────
+    # -- Rounding -------------------------------------------------------------
     def round_min_ellipsoid(self):
         """
         Round the polytope by transforming the minimum enclosing ellipsoid
@@ -333,7 +332,7 @@ class HPolytope:
         """
         Round using the log-barrier (analytic center) ellipsoid.
 
-        The analytic center is the minimizer of ``-∑ log(bᵢ - aᵢᵀx)``.
+        The analytic center is the minimizer of ``-sum log(bi - aiTx)``.
         Its Hessian defines the rounding ellipsoid.
 
         Parameters
@@ -341,7 +340,7 @@ class HPolytope:
         max_iterations : int
             Maximum rounding iterations (default 5).
         max_eig_ratio : float
-            Stop when max/min eigenvalue ratio ≤ this value (default 6).
+            Stop when max/min eigenvalue ratio <= this value (default 6).
 
         Returns
         -------
@@ -359,7 +358,7 @@ class HPolytope:
         """
         Round using the volumetric-barrier ellipsoid.
 
-        The volumetric center minimizes ``logdet(∇²f(x))`` where ``f``
+        The volumetric center minimizes ``logdet(grad^2f(x))`` where ``f``
         is the log-barrier.  Tends to produce more uniform rounding than
         the log-barrier alone.
 
@@ -380,7 +379,7 @@ class HPolytope:
         """
         Round using the Vaidya-barrier ellipsoid.
 
-        The Vaidya center minimizes ``logdet(∇²f(x)) + (d/m) f(x)``,
+        The Vaidya center minimizes ``logdet(grad^2f(x)) + (d/m) f(x)``,
         interpolating between the volumetric and analytic centers.
         Often the best choice for high-dimensional polytopes.
 
@@ -397,7 +396,7 @@ class HPolytope:
         T, T_shift, rv = self._poly.round_vaidya_barrier(max_iterations, max_eig_ratio)
         return np.array(T), np.array(T_shift), float(rv)
 
-    # ── Dunder ────────────────────────────────────────────────────────────────
+    # -- Dunder ----------------------------------------------------------------
     def __repr__(self) -> str:
         return (
             f"HPolytope(dimension={self.dimension()}, "
@@ -410,7 +409,7 @@ class VPolytope:
     V-Polytope: a convex polytope given as the convex hull of a finite set of
     vertices.
 
-        P = conv{ v₁, v₂, …, vₙ }
+        P = conv{ v_1, v_2, ..., vn }
 
     Parameters
     ----------
@@ -434,7 +433,7 @@ class VPolytope:
             raise ValueError("V must be a 2-D array with shape (n_vertices, d).")
         self._poly = _VPolytope(V)
 
-    # ── Metadata ─────────────────────────────────────────────────────────────
+    # -- Metadata -------------------------------------------------------------
     def dimension(self) -> int:
         """Return the ambient dimension d."""
         return self._poly.dimension()
@@ -471,7 +470,7 @@ class VPolytope:
         c, r = self._poly.compute_inner_ball()
         return np.array(c), float(r)
 
-    # ── Sampling ─────────────────────────────────────────────────────────────
+    # -- Sampling -------------------------------------------------------------
     def sample(
         self,
         n_samples: int = 1000,
@@ -496,7 +495,7 @@ class VPolytope:
             self._poly.uniform_sample(n_samples, walk_length, burn_in, walk_type, seed)
         )
 
-    # ── Volume ────────────────────────────────────────────────────────────────
+    # -- Volume ----------------------------------------------------------------
     def volume(
         self,
         error: float = 0.1,
@@ -528,8 +527,7 @@ class VPolytope:
         )
 
 
-# ── Convenience constructors ─────────────────────────────────────────────────
-
+# --- Convenience constructors ---
 def hypercube(d: int, r: float = 1.0) -> HPolytope:
     """
     Create the hypercube [-r, r]^d as an H-polytope.
@@ -554,7 +552,7 @@ def hypersimplex(d: int) -> HPolytope:
     """
     Create the standard d-dimensional simplex as an H-polytope.
 
-        S_d = { x ∈ ℝ^d : x_i ≥ 0, Σ x_i ≤ 1 }
+        S_d = { x in R^d : x_i >= 0, Sigma x_i <= 1 }
 
     Parameters
     ----------
@@ -574,7 +572,7 @@ def cross_polytope(d: int, r: float = 1.0) -> HPolytope:
     """
     Create the cross-polytope (hyperoctahedron) as an H-polytope.
 
-        C_d = { x : |x_1| + … + |x_d| ≤ r }
+        C_d = { x : |x_1| + ... + |x_d| <= r }
 
     Parameters
     ----------
@@ -597,20 +595,20 @@ def birkhoff_polytope(n: int) -> HPolytope:
     """
     Create the Birkhoff polytope B(n) as an H-polytope.
 
-    The Birkhoff polytope B(n) is the convex polytope of n×n doubly
-    stochastic matrices — non-negative real matrices whose rows and
+    The Birkhoff polytope B(n) is the convex polytope of nxn doubly
+    stochastic matrices -- non-negative real matrices whose rows and
     columns each sum to 1.  By the Birkhoff-von Neumann theorem its
-    vertices are exactly the n×n permutation matrices.
+    vertices are exactly the nxn permutation matrices.
 
     The polytope is represented in a reduced coordinate space of
-    dimension d = (n-1)² obtained by eliminating the redundant last
+    dimension d = (n-1)^2 obtained by eliminating the redundant last
     row and last column of the stochastic matrix.
 
     Properties
     ----------
-    * Dimension  : (n-1)²
+    * Dimension  : (n-1)^2
     * Vertices   : n!  (permutation matrices)
-    * Facets     : n²  (non-negativity constraints)
+    * Facets     : n^2  (non-negativity constraints)
 
     Parameters
     ----------
@@ -637,7 +635,7 @@ def birkhoff_polytope(n: int) -> HPolytope:
     return HPolytope(A, b)
 
 
-# ── Public API ────────────────────────────────────────────────────────────────
+# --- Public API ---
 __all__ = [
     "HPolytope",
     "VPolytope",

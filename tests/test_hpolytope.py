@@ -23,8 +23,7 @@ pytestmark = pytest.mark.skipif(not HAVE_EXT,
     reason="C++ extension _volestipy not built")
 
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
-
+# --- Helpers ---
 def make_cube_hpoly(d: int, r: float = 1.0) -> HPolytope:
     """[-r, r]^d as an H-polytope."""
     A = np.vstack([np.eye(d), -np.eye(d)])
@@ -39,8 +38,7 @@ def make_simplex_hpoly(d: int) -> HPolytope:
     return HPolytope(A, b)
 
 
-# ── Construction tests ────────────────────────────────────────────────────────
-
+# --- Construction tests ---
 class TestHPolytopeConstruction:
     def test_dimension(self):
         P = make_cube_hpoly(3)
@@ -85,8 +83,7 @@ class TestHPolytopeConstruction:
         assert P.is_in(np.array([0.3, 0.3, 0.3]))  # sum = 0.9 <= 1
 
 
-# ── Membership tests ──────────────────────────────────────────────────────────
-
+# --- Membership tests ---
 class TestHPolytopeMembership:
     def test_origin_in_cube(self):
         P = make_cube_hpoly(5)
@@ -110,8 +107,7 @@ class TestHPolytopeMembership:
         assert not P.is_in(np.array([0.5, 0.5, 0.5]))  # sum = 1.5 > 1
 
 
-# ── Inner ball tests ──────────────────────────────────────────────────────────
-
+# --- Inner ball tests ---
 class TestHPolytopeInnerBall:
     def test_inner_ball_cube(self):
         P = make_cube_hpoly(3)
@@ -129,8 +125,7 @@ class TestHPolytopeInnerBall:
         assert P.is_in(center)
 
 
-# ── Sampling tests ────────────────────────────────────────────────────────────
-
+# --- Sampling tests ---
 class TestHPolytopeUniformSampling:
     @pytest.mark.parametrize("walk_type", [
         "cdhr", "rdhr", "ball_walk", "billiard"])
@@ -207,8 +202,7 @@ class TestHPolytopeGaussianSampling:
         assert samples.shape == (3, 50)
 
 
-# ── Volume tests ──────────────────────────────────────────────────────────────
-
+# --- Volume tests ---
 class TestHPolytopeVolume:
     """
     Volume of the d-cube [-1,1]^d = 2^d.

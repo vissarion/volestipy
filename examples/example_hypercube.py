@@ -41,14 +41,14 @@ def main():
     for wt in ["cdhr", "rdhr", "ball_walk", "billiard", "dikin"]:
         samples = P.sample(n_samples=500, walk_type=wt, seed=42)
         print(f"  walk={wt:20s}  shape={samples.shape}  "
-              f"mean≈{samples.mean(axis=1).round(3)}")
+              f"mean~={samples.mean(axis=1).round(3)}")
 
     # ------------------------------------------------------------------
     # 3. Gaussian sampling
     # ------------------------------------------------------------------
     print("\n--- Gaussian sampling (a=2.0) ---")
     gsamples = P.gaussian_sample(n_samples=500, a=2.0, walk_type="cdhr", seed=0)
-    print(f"  shape={gsamples.shape}  std≈{gsamples.std(axis=1).round(3)}")
+    print(f"  shape={gsamples.shape}  std~={gsamples.std(axis=1).round(3)}")
 
     # ------------------------------------------------------------------
     # 4. Volume estimation
@@ -57,7 +57,7 @@ def main():
     for algo in ["cooling_balls", "sequence_of_balls", "cooling_gaussians"]:
         wt = "cdhr" if algo != "cooling_gaussians" else "cdhr"
         vol = P.volume(error=0.15, algorithm=algo, walk_type=wt)
-        print(f"  algorithm={algo:25s}  vol≈{vol:.3f}  (error {abs(vol-16)/16*100:.1f}%)")
+        print(f"  algorithm={algo:25s}  vol~={vol:.3f}  (error {abs(vol-16)/16*100:.1f}%)")
 
     # ------------------------------------------------------------------
     # 5. 3-D standard simplex
@@ -70,7 +70,7 @@ def main():
     print(f"All non-negative:  {(samples_s >= -1e-9).all()}")
     print(f"All sum <= 1:      {(samples_s.sum(axis=0) <= 1 + 1e-9).all()}")
     vol_s = S.volume(error=0.2)
-    print(f"Volume estimate: {vol_s:.5f}  (true ≈ {1.0/6:.5f})")
+    print(f"Volume estimate: {vol_s:.5f}  (true ~= {1.0/6:.5f})")
     
     # ------------------------------------------------------------------
     # 6. V-Polytope: 2-D triangle

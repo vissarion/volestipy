@@ -6,21 +6,21 @@
 cmake_minimum_required(VERSION 3.15)
 project(volestipy VERSION 0.1.0 LANGUAGES C CXX)
 
-# ─── C++ standard ────────────────────────────────────────────────────────────
+# --- C++ standard ---
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# ─── Build type ──────────────────────────────────────────────────────────────
+# --- Build type ---
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 
-# ─── Options ─────────────────────────────────────────────────────────────────
+# --- Options ---
 option(DISABLE_LPSOLVE "Disable the LP-solve dependency" OFF)
 option(VOLESTIPY_USE_MKL "Use Intel MKL for Eigen" OFF)
 
-# ─── Find pybind11 ───────────────────────────────────────────────────────────
+# --- Find pybind11 ---
 # First try the Python-installed pybind11, then CMake config
 find_package(pybind11 CONFIG QUIET)
 if(NOT pybind11_FOUND)
@@ -34,7 +34,7 @@ if(NOT pybind11_FOUND)
     find_package(pybind11 REQUIRED HINTS "${pybind11_DIR}")
 endif()
 
-# ─── Find Eigen3 ─────────────────────────────────────────────────────────────
+# --- Find Eigen3 ---
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 if(NOT Eigen3_FOUND)
     # Fallback: look for Eigen in common locations
@@ -50,7 +50,7 @@ if(NOT Eigen3_FOUND)
         INTERFACE_INCLUDE_DIRECTORIES "${EIGEN3_INCLUDE_DIR}")
 endif()
 
-# ─── Find Boost ──────────────────────────────────────────────────────────────
+# --- Find Boost ---
 # volesti only needs Boost headers (random, math) - no compiled libraries required
 find_package(Boost 1.56 REQUIRED)
 if(NOT Boost_FOUND)
@@ -61,7 +61,7 @@ if(NOT Boost_FOUND)
     message(STATUS "Boost headers found at ${Boost_INCLUDE_DIRS}")
 endif()
 
-# ─── volesti include path ─────────────────────────────────────────────────────
+# --- volesti include path ---
 # You can override this with -DVOLESTI_INCLUDE_DIR=/path/to/volesti/include
 set(VOLESTI_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/volesti/include"
     CACHE PATH "Path to the volesti include directory")
@@ -74,7 +74,7 @@ if(NOT EXISTS "${VOLESTI_INCLUDE_DIR}/cartesian_geom/cartesian_kernel.h")
         "  2. Set:  -DVOLESTI_INCLUDE_DIR=/path/to/volesti/include\n")
 endif()
 
-# ─── LP-solve (bundled source, same approach as dingo) ───────────────────────
+# --- LP-solve (bundled source, same approach as dingo) ---
 set(LPSOLVE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/lp_solve_5.5")
 
 if(DISABLE_LPSOLVE)
@@ -134,7 +134,7 @@ else()
     set(LPSOLVE_INCLUDE_DIRS "")
 endif()
 
-# ─── Compiler flags ──────────────────────────────────────────────────────────
+# --- Compiler flags ---
 set(VOLESTIPY_COMPILE_OPTIONS
     -O3
     -march=native
@@ -147,7 +147,7 @@ if(VOLESTIPY_USE_MKL)
     list(APPEND VOLESTIPY_COMPILE_OPTIONS -DEIGEN_USE_MKL_ALL)
 endif()
 
-# ─── Build the extension ─────────────────────────────────────────────────────
+# --- Build the extension ---
 pybind11_add_module(_volestipy MODULE
     src/bindings/volesti_bindings.cpp
     ${LPSOLVE_SOURCES}
@@ -173,13 +173,13 @@ target_compile_options(_volestipy PRIVATE
     ${VOLESTIPY_COMPILE_OPTIONS}
 )
 
-# ─── Installation ────────────────────────────────────────────────────────────
+# --- Installation ---
 install(TARGETS _volestipy
     LIBRARY DESTINATION volestipy
     RUNTIME DESTINATION volestipy
 )
 
-# ─── Status messages ─────────────────────────────────────────────────────────
+# --- Status messages ---
 message(STATUS "=== volestipy configuration ===")
 message(STATUS "  Build type       : ${CMAKE_BUILD_TYPE}")
 message(STATUS "  volesti headers  : ${VOLESTI_INCLUDE_DIR}")

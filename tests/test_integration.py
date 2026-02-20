@@ -35,8 +35,7 @@ def simplex_volume(d):
     return 1.0 / math.factorial(d)
 
 
-# ── Module-level free-function tests ─────────────────────────────────────────
-
+# --- Module-level free-function tests ---
 class TestFreeFunctions:
     def test_hpoly_sample_function(self):
         from volestipy._volestipy import hpoly_sample
@@ -70,8 +69,7 @@ class TestFreeFunctions:
         assert vol > 0
 
 
-# ── Statistical sanity checks ─────────────────────────────────────────────────
-
+# --- Statistical sanity checks ---
 class TestSamplingStatistics:
     """Verify that samples have roughly the correct mean and covariance."""
 
@@ -85,7 +83,7 @@ class TestSamplingStatistics:
                                    err_msg="Sample mean of hypercube should be ~0")
 
     def test_cube_sample_std(self):
-        """Std dev of Uniform[-1,1] is 1/sqrt(3) ≈ 0.577."""
+        """Std dev of Uniform[-1,1] is 1/sqrt(3) ~= 0.577."""
         d = 4
         P = hypercube(d)
         samples = P.sample(n_samples=2000, burn_in=200, seed=0)
@@ -112,8 +110,7 @@ class TestSamplingStatistics:
         assert s_high.std() < s_low.std() + 0.3
 
 
-# ── High-dimensional smoke tests ─────────────────────────────────────────────
-
+# --- High-dimensional smoke tests ---
 class TestHighDimensional:
     """Basic sanity checks for higher dimensions."""
 
