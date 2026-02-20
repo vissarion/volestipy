@@ -269,7 +269,7 @@ class HPolytope:
         error: float = 0.1,
         walk_length: int = 1,
         algorithm: str = "cooling_balls",
-        walk_type: str = "cdhr",
+        walk_type: str = "billiard",
     ) -> float:
         """
         Estimate the volume of the polytope.
