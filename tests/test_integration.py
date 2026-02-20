@@ -1,3 +1,8 @@
+# volestipy : a python library for sampling and volume computation
+# volestipy is part of GeomScale project
+
+# Licensed under GNU LGPL 2.1, see LICENCE file
+
 """
 Integration tests: compare sampling statistics against analytical ground truth
 and verify volume estimates are within acceptable Monte Carlo bounds.
@@ -103,7 +108,7 @@ class TestSamplingStatistics:
         P = hypercube(d)
         s_low = P.gaussian_sample(n_samples=500, a=0.01, seed=0)
         s_high = P.gaussian_sample(n_samples=500, a=100.0, seed=0)
-        # High a → more concentrated → smaller std
+        # High a -> more concentrated -> smaller std
         assert s_high.std() < s_low.std() + 0.3
 
 
@@ -126,5 +131,5 @@ class TestHighDimensional:
         vol = P.volume(error=0.3, algorithm="cooling_balls")
         expected = cube_volume(d)
         assert vol > 0
-        # loose bound: within 2× of true value
-        assert vol < 3 * expected
+        # loose bound: within 2x of true value
+        assert vol < 2 * expected

@@ -1,6 +1,7 @@
-// volestipy - Python bindings for the volesti library using pybind11
-// Copyright (c) 2024 volestipy contributors
-// Licensed under GNU LGPL.3
+// volestipy : a python library for sampling and volume computation
+// volestipy is part of GeomScale project
+
+// Licensed under GNU LGPL 2.1, see LICENCE file
 
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>

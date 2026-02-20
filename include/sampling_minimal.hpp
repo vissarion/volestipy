@@ -1,3 +1,8 @@
+// volestipy : a python library for sampling and volume computation
+// volestipy is part of GeomScale project
+
+// Licensed under GNU LGPL 2.1, see LICENCE file
+
 // Minimal sampling header for volestipy.
 // Includes only uniform_sampling, gaussian_sampling, and
 // exponential_sampling, avoiding the ifopt / ode_solvers /

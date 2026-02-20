@@ -1,3 +1,8 @@
+# volestipy : a python library for sampling and volume computation
+# volestipy is part of GeomScale project
+
+# Licensed under GNU LGPL 2.1, see LICENCE file
+
 """
 volestipy - Python bindings for the volesti C++ library.
 
